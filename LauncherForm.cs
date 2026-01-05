@@ -9,7 +9,7 @@ namespace LauncherClient
     {
 
 
-        public const string cnpjNumber = "60.120.123/0001";
+        public const string cnpjNumber = "60.938.777/0001-23";
         public LauncherForm()
         {
             InitializeComponent();
@@ -46,19 +46,21 @@ namespace LauncherClient
 
         private async Task ExecuteUpdateAsync()
         {
+            CloseSystem();
+
             RefreshStatus("Validando versão...", 10);
 
             var localVersion = GetLocalVersion();
             var apiResponse = await GetServerVersionAsync(cnpjNumber, localVersion);
 
-            if (!apiResponse.Atualizar)
+            if (!apiResponse.update)
             {
                 OpenSystem();
                 return;
             }
 
             RefreshStatus("Baixando arquivos...", 30);
-            var zipPath = await DownloadUpdateAsync(apiResponse.UrlDownload);
+            var zipPath = await DownloadUpdateAsync(apiResponse.urlDownload);
 
             RefreshStatus("Atualizando sistema...", 70);
             UpdateSystem(zipPath);
@@ -84,7 +86,7 @@ namespace LauncherClient
         private async Task<UpdateInfo> GetServerVersionAsync(string cnpjNumber, string localVersion)
         {
             using var client = new HttpClient();
-            var url = $"http://localhost:5100/latest?idClient={cnpjNumber}&version={localVersion}";
+            var url = $"http://localhost:5100/latest?cnpj={cnpjNumber}&version={localVersion}";
             return await client.GetFromJsonAsync<UpdateInfo>(url)
                    ?? throw new Exception("Resposta inválida da API");
         }
@@ -118,14 +120,17 @@ namespace LauncherClient
 
         private void UpdateSystem(string zipPath)
         {
+            var mainPath = @"C:\Projetos\Launcher\ProgramaAtual";
+
+            ZipFile.ExtractToDirectory(zipPath, mainPath, true);
+        }
+
+        private void CloseSystem() 
+        {
             foreach (var proc in Process.GetProcessesByName("SQOWatchGlobalVariables"))
                 proc.Kill();
 
             Thread.Sleep(1000);
-
-            var mainPath = @"C:\Projetos\Launcher\ProgramaAtual";
-
-            ZipFile.ExtractToDirectory(zipPath, mainPath, true);
         }
 
         private void OpenSystem()
