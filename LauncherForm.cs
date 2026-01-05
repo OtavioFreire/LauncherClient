@@ -7,9 +7,8 @@ namespace LauncherClient
 {
     public partial class LauncherForm : Form
     {
-
-
         public const string cnpjNumber = "60.938.777/0001-23";
+
         public LauncherForm()
         {
             InitializeComponent();

@@ -1,5 +1,4 @@
-﻿
-namespace LauncherClient
+﻿namespace LauncherClient
 {
     public class UpdateInfo
     {
